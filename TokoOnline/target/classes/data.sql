@@ -21,3 +21,15 @@ VALUES
 ('Makanan'),
 ('Minuman'),
 ('Cemilan');
+
+INSERT INTO pesanan (user_id, order_date, total_amount)
+VALUES
+(1, CURRENT_TIMESTAMP, 20000),
+(2, CURRENT_TIMESTAMP, 30000);
+
+INSERT INTO detail_pesanan(order_id, product_id, quantity, subtotal)
+VALUES
+(1,1,1,10000),
+(1,2,1,10000),
+(2,3,1,10000),
+(2,1,2,10000);

@@ -16,7 +16,7 @@ public interface PesananRepository extends JpaRepository<PesananEntity, Long>{
     @Query(nativeQuery = true, value = "SELECT \r\n" + //
                 "    pesanan.order_id,\r\n" + //
                 "    pesanan.order_date, \r\n" + //
-                "    users.nama_lengkap, \r\n" + //
+                "    users.fullname as nama_lengkap, \r\n" + //
                 "    pesanan.total_amount, \r\n" + //
                 "    product.product_name, \r\n" + //
                 "    detail_pesanan.quantity, \r\n" + //
