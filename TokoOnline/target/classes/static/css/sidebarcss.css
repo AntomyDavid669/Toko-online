@@ -1,0 +1,49 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px; /* Increased sidebar width */
+    height: 100%; /* Sidebar height */
+    background-color: #343a40; /* Sidebar background color */
+    padding-top: 3.5rem; /* Distance between header and menu */
+    overflow-y: auto; /* Enable vertical scroll if content overflows */
+    z-index: 1000; /* Ensure sidebar stays above other content */
+}
+
+.sidebar ul {
+    padding-left: 0;
+    list-style: none;
+    margin: 0; /* Remove default margin */
+}
+
+.sidebar ul li {
+    padding: 16px 20px; /* Increased padding */
+    border-bottom: 1px solid rgba(255,255,255,0.1); /* Separator line between menu items */
+}
+
+.sidebar ul li:last-child {
+    border-bottom: none; /* Remove separator line from last menu item */
+}
+
+.sidebar ul li button {
+    color: #ffffff; /* Menu text color */
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 24px; /* Increased padding for larger buttons */
+    margin-bottom: 8px; /* Added margin between buttons */
+    font-size: 18px; /* Increased font size */
+}
+
+.sidebar ul li button:hover {
+    background-color: rgba(255,255,255,0.1); /* Background color on hover */
+    color: white; /* Text color on hover */
+}
+
+.sidebar ul li button.active {
+    background-color: rgba(255,255,255,0.1); /* Background color for active button */
+}
+

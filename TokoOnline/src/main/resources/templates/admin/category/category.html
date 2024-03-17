@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Category</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="/jqueryui/jquery-ui.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/sidebarcss.css">
+
+    <script src="/js/jquery-3.7.1.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/jqueryui/jquery-ui.min.js"></script>
+    <style>
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2">
+                <header th:replace="~{/fragments/sidebar.html :: headerAdmin}"></header>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10">
+                <main class="container py-5">
+                    <h1 class="mb-3">Category</h1>
+					<div id="info-name"></div>
+            
+                    <!-- Search and Add Buttons -->
+                    <div class="row mb-3">
+                        <div class="col-9 px-2">
+                            <input id="input-search" type="search" class="form-control" placeholder="Search..." aria-label="Search">
+                        </div>
+                        <div class="col-3 px-2">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" type="button" onclick="addItemModal()">Add</button>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Table -->
+                    <table id="table" class="table table-bordered mb-3">
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th id="categorySort" class="col-md-8" onclick="sortTable('CATEGORY')"><i class="fas fa-sort"></i> Category</th>
+                                <th scope="col" class="col-md-4 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- <tr>
+                                <th scope="row">1</th>
+                                <td>Category A</td>
+                                <td class="center">
+                                    <a href="javascript:editItemModal(1)" class="btn btn-warning btn-sm me-5"><i class="fas fa-edit"></i> Edit</a>
+                                    <a href="javascript:deleteItemModal(1)" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> Delete</a>
+                                </td>                                
+                            </tr> -->
+                        </tbody>
+                    </table>
+            
+                    <!-- Pagination -->
+                    <nav class="float-end" aria-label="Page navigation example">
+                        <ul id="pagination-container" class="pagination">
+                            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                        </ul>
+                    </nav>
+                </main>
+            </div>
+
+            <!-- Modal -->
+            <div id="modalAddEdit" class="modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div th:replace="admin/category/add-edit.html :: add-edit"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <div id="modalDelete" class="modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div th:replace="admin/category/delete.html :: delete"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Script Kumpulan Variabel Global-->
+	<script th:inline="javascript">
+		//userId User yang login saat ini
+		//Data didapat dari controller
+		const userId = /*[[${user_id}]]*/ -1;
+		console.log('User ID yang login : ' + userId)
+
+		//Data List Original
+		let dataListOri = []
+		// DataList -> Untuk di UI (udah di proses dll)
+		let dataList = []
+
+		//Modal
+		let modal
+
+		//AddEditDelete
+		let mode
+		let editId
+		let deleteId
+
+		//Pagination
+		const limit = 5
+
+		//Sorting
+		let categorySortOrder = "ASC"
+		let initialSortOrder = "ASC"
+		let nameSortOrder = "ASC"
+		let sortByGlobal;
+		let sortOrder;	
+	</script>
+
+	<!--Kumpulan Script untuk AJAX-->
+	<script>
+		function getAllCategoryAPI() {
+			var settings = {
+                "url": "/api/category",
+				"method": "GET",
+				"timeout": 0,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+		function insertCategoryAPI(respBody) {
+			var settings = {
+                "url": "/api/category",
+				"method": "POST",
+				"timeout": 0,
+				"headers": {
+					"Content-Type": "application/json"
+				},
+				"data": respBody,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+		function updateCategoryAPI(respBody) {
+			var settings = {
+                "url": "/api/category",
+				"method": "PUT",
+				"timeout": 0,
+				"headers": {
+					"Content-Type": "application/json"
+				},
+				"data": respBody,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+		function deleteCategoryAPI(resBody) {
+			var settings = {
+				"url": "/api/category",
+				"method": "DELETE",
+				"timeout": 0,
+				"headers": {
+					"Content-Type": "application/json"
+				},
+				"data": resBody,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+	</script>
+
+	<!--Kumpulan Logic untuk button click-->
+	<script>
+		$('#input-search').on('input', function () {
+			refreshList();
+		});
+
+
+		$("#btn-save").click(function () {
+			$('#err-initial').html(``)
+			$('#err-name').html(``)
+
+			//Penjagaan agar program tidak dilanjutkan
+			//jika initial atau namenya kosong
+			const name = $("#input-name").val()
+			if (name == null || name == "") {
+				return
+			}
+			
+			const active = $("#input-active").prop('checked')
+
+			if (mode == 'add') {
+				const data = {
+					category_name: name,
+				}
+
+				dataJSON = JSON.stringify(data)
+				console.log(dataJSON);
+
+				const response = insertCategoryAPI(dataJSON).responseText
+				console.log(response)
+				if(response == "Category Added successfully") {
+					modal.toggle()
+					refreshList()
+					$('#info-name').html(`
+						<p class='text-info'>Category ${name} Added successfully</p>
+					`)
+				} else{
+					$('#err-name').html(`
+						<p class='text-danger'>${response}</p>
+					`)
+				}
+				
+			} else if (mode == 'edit') {
+				const data = {
+					id: editId,
+					category_name: name
+				}
+
+				dataJSON = JSON.stringify(data)
+				console.log(dataJSON);
+
+				const response = updateCategoryAPI(dataJSON).responseText
+				console.log(response)
+				if(response == "Category Updated successfully") {
+					modal.toggle()
+					refreshList()
+					$('#info-name').html(`
+						<p class='text-info'>Category ${name} Updated successfully</p>
+					`)
+				} else{
+					$('#err-name').html(`
+						<p class='text-danger'>${response}</p>
+					`)
+				}
+			}
+		})
+
+		$('#btn-delete').click(function () {
+			const data = {
+				id: deleteId,
+			}
+
+			const dataJSON = JSON.stringify(data)
+
+			const response = deleteCategoryAPI(dataJSON).responseText
+			if(response == "Category Deleted successfully") {
+				modal.toggle()
+				refreshList()
+				$('#info-name').html(`
+					<p class='text-info'>${response}</p>
+				`)
+			} else{
+				$('#err-name').html(`
+					<p class='text-danger'>${response}</p>
+				`)
+			}
+		})
+
+		$(".btn-cancel").click(function () {
+			modal.toggle()
+			$('#info-name').html('')
+		})
+
+	</script>
+
+	<!--Kumpulan Script untuk Sorting Table-->
+	<script>
+		function sortTable(sortBy) {
+			if (sortBy == 'INITIAL') {
+				nameSortOrder = "ASC"
+				categorySortOrder = "ASC"
+				$('#nameSort').html('<i class="fas fa-sort"></i> Name')
+				$('#categorySort').html('<i class="fas fa-sort"></i> Category')
+
+				initialSortOrder = initialSortOrder == "ASC" ? "DESC" : "ASC"
+				if (initialSortOrder == "ASC") {
+					$('#initialSort').html('<i class="fas fa-sort-up"></i> Initial')
+				} else {
+					$('#initialSort').html('<i class="fas fa-sort-down"></i> Initial')
+				}
+
+				sortByGlobal = sortBy
+				sortOrder = initialSortOrder
+			} else if (sortBy == 'NAME') {
+				initialSortOrder = "ASC"
+				categorySortOrder = "ASC"
+				$('#initialSort').html('<i class="fas fa-sort"></i> Initial')
+				$('#categorySort').html('<i class="fas fa-sort"></i> Category')
+
+				nameSortOrder = nameSortOrder == "ASC" ? "DESC" : "ASC"
+				if (nameSortOrder == "ASC") {
+					$('#nameSort').html('<i class="fas fa-sort-up"></i> Name')
+				} else {
+					$('#nameSort').html('<i class="fas fa-sort-down"></i> Name')
+				}
+
+				sortByGlobal = sortBy
+				sortOrder = nameSortOrder
+			} else if (sortBy == 'CATEGORY') {
+				initialSortOrder = "ASC"
+				nameSortOrder = "ASC"
+				$('#initialSort').html('<i class="fas fa-sort"></i> Initial')
+				$('#nameSort').html('<i class="fas fa-sort"></i> Name')
+
+				categorySortOrder = categorySortOrder == "ASC" ? "DESC" : "ASC"
+				if (categorySortOrder == "ASC") {
+					$('#categorySort').html('<i class="fas fa-sort-up"></i> Category')
+				} else {
+					$('#categorySort').html('<i class="fas fa-sort-down"></i> Category')
+				}
+				
+				sortByGlobal = sortBy
+				sortOrder = categorySortOrder
+			}
+			refreshList()
+		}
+	</script>
+
+	<!--Script untuk logic reset pagination UI-->
+	<script>
+		function resetPaginationUI(page, total_data, total_page) {
+			$('#pagination-container').html('');
+			$('#pagination-container').append(
+				`<li class="page-item ${page == 1 ? 'disabled' : ''}">
+					<a class="page-link " 
+						href="javascript:refreshList(${page - 1})">
+							Previous
+					</a>
+				</li>`
+			)
+
+			for (i = 0; i < total_page; i++) {
+				$('#pagination-container').append(`
+					<li class="page-item ${(i + 1) == page ? 'active' : ''}">
+						<a class="page-link"
+							href="javascript:refreshList(${i + 1})">
+							${i + 1}
+						</a>
+					</li>
+				`)
+			}
+
+			$('#pagination-container').append(
+				`<li class="page-item ${page == total_page ? 'disabled' : ''}">
+					<a class="page-link " 
+						href="javascript:refreshList(${page + 1})">
+							Next
+					</a>
+				</li>`
+			)
+		}
+	</script>
+
+	<!--Kumpulan Script untuk Fungsi Modal-->
+	<script>
+		function addItemModal() {
+			modal = new bootstrap.Modal($('#modalAddEdit'));
+			modal.toggle()
+			resetAddUi()
+		}
+
+		function editItemModal(index) {
+			modal = new bootstrap.Modal($('#modalAddEdit'));
+			modal.toggle()
+			resetEditUi(index)
+		}
+
+		function deleteItemModal(index) {
+			modal = new bootstrap.Modal($('#modalDelete'));
+			modal.toggle()
+			resetDeleteUi(index)
+		}
+
+		function resetAddUi() {
+			$("#title-add-edit").html("Add Variant")
+			$("#input-name").val("")
+			$("#btn-save").val('Add')
+
+			$('#err-initial').html(``)
+			$('#err-name').html(``)
+
+			mode = 'add'
+		}
+
+		function resetEditUi(index) {
+			const data = dataList[index]
+
+			editId = data.id
+			$("#title-add-edit").html("Edit Variant")
+			$("#input-name").val(data.category_name)
+			$("#btn-save").val('Edit')
+
+			$('#err-initial').html(``)
+			$('#err-name').html(``)
+
+			mode = 'edit'
+		}
+
+		function resetDeleteUi(index) {
+			const data = dataList[index]
+			console.log(data)
+
+			deleteId = data.id
+
+			$('#delete-title').html(`
+				Apakah anda yakin akan delete ${data.category_name}?
+			`)
+		}
+	</script>
+
+
+	<!--Script Logic Handle Search, Pagination & SortBy Frontend-->
+	<script>
+		function handleSearchPaginationSortingFE(list, page, keyword, sortBy, sortOrder) {
+			//Latihan 2 Logic untuk search using javascript
+			list = list.filter(data =>
+				data.category_name.toLowerCase().includes(keyword.toLowerCase())
+			)
+
+			//Latihan 3 Logic untuk sorting
+			// sortBy 'INITIAL' 'NAME' 'CATEGORY'
+			// sortOrder 'ASC' 'DESC'
+			if (sortBy == 'CATEGORY') {
+				list.sort((a, b) => a.category_name.localeCompare(b.category_name))
+			}
+
+			if(sortOrder == 'DESC'){
+				list.reverse()
+			}
+
+			//Latihan 4 Logic untuk Pagination
+			let total_data = list.length;
+			let total_page = Math.ceil(total_data / limit.toFixed(2));
+
+			resetPaginationUI(page, total_data, total_page);
+
+			list = list.slice((page-1)*limit, (page*limit))
+
+			return list
+		}
+	</script>
+
+	<!--Script Refresh List Ketika pertama kali halaman web dibuka-->
+	<script>
+		function refreshList(page) {
+			$('#info-name').html('')
+
+			if (page == null) {
+				page = 1
+			}
+
+			const keyword = $("#input-search").val()
+
+			const response = getAllCategoryAPI().responseJSON
+			dataListOri = response // original
+			dataList = handleSearchPaginationSortingFE(dataListOri, page, keyword, sortByGlobal, sortOrder); //ini utk UI
+			$('tbody').html('')
+			for (i = 0; i < dataList.length; i++) {
+				const data = dataList[i]
+				$('tbody').append(
+					`
+						<tr>
+							<th scope="row">${limit * (page - 1) + (i + 1)}</th>
+							<td>${data.category_name}</td>
+							<td>
+								<a href="javascript:editItemModal(${i})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i>
+								Edit</a>
+								<a href="javascript:deleteItemModal(${i})" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i>
+								Delete</a>
+								</td>
+					    </tr>
+					`
+				)
+			}
+		}
+
+		refreshList()
+	</script>
+</body>
+</html>

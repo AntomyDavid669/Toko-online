@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin</title>
+
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="/jqueryui/jquery-ui.min.css" rel="stylesheet" />
+
+    <script src="/js/jquery-3.7.1.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/jqueryui/jquery-ui.min.js"></script>
+
+</head>
+<body>
+  <div th:fragment="headerAdmin">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <button id="orderBtn" class="nav-link" onclick="navigateTo('/admin/order')">Orders</button>
+        </li>
+        <li class="nav-item">
+          <button id="productBtn" class="nav-link" onclick="navigateTo('/admin/product')">Products</button>
+        </li>
+        <li class="nav-item">
+          <button id="categoryBtn" class="nav-link" onclick="navigateTo('/admin/category')">Categories</button>
+        </li>
+      </ul>
+    </div>
+    <script>
+      function navigateTo(url) {
+          window.location.href = url;
+          setActiveButton(url);
+      }
+
+      function setActiveButton(url) {
+          var orderBtn = document.getElementById('orderBtn');
+          var productBtn = document.getElementById('productBtn');
+          var categoryBtn = document.getElementById('categoryBtn');
+
+          // Remove 'active' class from all buttons
+          orderBtn.classList.remove('active');
+          productBtn.classList.remove('active');
+          categoryBtn.classList.remove('active');
+
+          // Determine which button to set as active based on the URL
+          if (url.includes('/admin/order')) {
+              orderBtn.classList.add('active');
+          } else if (url.includes('/admin/product')) {
+              productBtn.classList.add('active');
+          } else if (url.includes('/admin/category')) {
+              categoryBtn.classList.add('active');
+          }
+      }
+
+      // Call setActiveButton function on page load to set the active button based on the current URL
+      window.onload = function() {
+          setActiveButton(window.location.href);
+      };
+
+    </script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Product</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="/jqueryui/jquery-ui.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/sidebarcss.css">
+
+    <script src="/js/jquery-3.7.1.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/jqueryui/jquery-ui.min.js"></script>
+    <style>
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2">
+                <header th:replace="~{/fragments/sidebar.html :: headerAdmin}"></header>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10">
+                <main class="container py-5">
+                    <h1 class="mb-3">Product</h1>
+					<div id="info-name"></div>
+                    <div class="row mb-3">
+                        <div class="col-9 px-2">
+                            <input id="input-search" type="search" class="form-control" placeholder="Search..." aria-label="Search">
+                        </div>
+                        <div class="col-3 px-2">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" type="button" onclick="addItemModal()">Add</button>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <table id="table" class="table table-bordered mb-3">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th id="productsort" onclick="sortTable('PRODUCT')"><i class="fas fa-sort"></i> Product</th>
+                                <th id="hargasort" onclick="sortTable('HARGA')"><i class="fas fa-sort"></i> Harga</th>
+                                <th>Deskripsi</th>
+                                <th id="stoksort" onclick="sortTable('STOK')"><i class="fas fa-sort"></i> Stok</th>
+                                <th id="categorySort" onclick="sortTable('CATEGORY')"><i class="fas fa-sort"></i> Kategori</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <!-- Auto Generated -->
+                            </tr>
+                        </tbody>
+                    </table>
+            
+                    <nav class="float-end" aria-label="Page navigation example">
+                        <ul id="pagination-container" class="pagination">
+                            <!-- Auto Generated -->
+                        </ul>
+                    </nav>
+                </main>
+            </div>
+
+            <!-- Modal -->
+            <div id="modalAddEdit" class="modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div th:replace="admin/product/add-edit.html :: add-edit"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <div id="modalDelete" class="modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div th:replace="admin/product/delete.html :: delete"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Script Kumpulan Variabel Global-->
+	<script th:inline="javascript">
+		//userId User yang login saat ini
+		//Data didapat dari controller
+		const userId = /*[[${user_id}]]*/ -1;
+		console.log('User ID yang login : ' + userId)
+
+		//Data List Original
+		let dataListOri = []
+		// DataList -> Untuk di UI (udah di proses dll)
+		let dataList = []
+
+		//Modal
+		let modal
+
+		//AddEditDelete
+		let mode
+		let editId
+		let deleteId
+
+		//Pagination
+		const limit = 10
+
+		//Sorting
+        let productSortOrder = "ASC";
+        let hargaSortOrder = "ASC";
+        let stokSortOrder = "ASC";
+        let categorySortOrder = "ASC";
+
+		let sortByGlobal;
+		let sortOrder;	
+	</script>
+
+	<!--Kumpulan Script untuk AJAX-->
+	<script>
+		function getAllCategoriesAPI() {
+			var settings = {
+				"url": "/api/category",
+				"method": "GET",
+				"timeout": 0,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+		function getAllVariantsAPI() {
+			var settings = {
+				"url": "/api/product",
+				"method": "GET",
+				"timeout": 0,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+		function insertVariantAPI(respBody) {
+			var settings = {
+				"url": "/api/product",
+				"method": "POST",
+				"timeout": 0,
+				"headers": {
+					"Content-Type": "application/json"
+				},
+				"data": respBody,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+		function updateVariantAPI(respBody) {
+			var settings = {
+				"url": "/api/product",
+				"method": "PUT",
+				"timeout": 0,
+				"headers": {
+					"Content-Type": "application/json"
+				},
+				"data": respBody,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+		function deleteVariantAPI(resBody) {
+			var settings = {
+				"url": "/api/product",
+				"method": "DELETE",
+				"timeout": 0,
+				"headers": {
+					"Content-Type": "application/json"
+				},
+				"data": resBody,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+	</script>
+
+	<!--Kumpulan Logic untuk button click-->
+	<script>
+		$('#input-search').on('input', function () {
+			refreshList();
+		});
+
+		$("#btn-save").click(function () {
+			$('#err-product').html('')
+            $('#err-harga').html('')
+            $('#err-deskripsi').html('')
+            $('#err-stok').html('')
+
+			//Penjagaan agar program tidak dilanjutkan
+			//jika initial atau namenya kosong
+			const product = $("#input-product").val()
+			if (product == null || product == "") {
+				return
+			}
+			const harga = $("#input-harga").val()
+			if (harga == null || harga == "") {
+				return
+			}
+            const deskripsi = $("#input-deskripsi").val()
+			if (deskripsi == null || deskripsi == "") {
+				return
+			}
+			const stok = $("#input-stok").val()
+			if (stok == null || stok == "") {
+				return
+			}
+
+			const categoryId = $("#dropdown-category").val()
+			if(categoryId == null || categoryId == ""){
+				return
+			}
+	
+			if (mode == 'add') {
+				const data = {
+					category_id: categoryId,
+					product_name: product,
+					harga: harga,
+					deskripsi: deskripsi,
+                    stok_quantity:stok
+				}
+
+				dataJSON = JSON.stringify(data)
+
+				const response = insertVariantAPI(dataJSON).responseText
+				if(response == "Product Added successfully") {
+					modal.toggle()
+					refreshList()
+					$('#info-name').html(`
+						<p class='text-info'>Product ${product} Added successfully</p>
+					`)
+				} else{
+					$('#err-product').html(`
+						<p class='text-danger'>${response}</p>
+					`)
+				}
+			} else if (mode == 'edit') {
+				const data = {
+					id: editId,
+					product_name: product,
+					harga: harga,
+					deskripsi: deskripsi,
+                    stok_quantity:stok,
+                    category_id: categoryId
+				}
+
+				dataJSON = JSON.stringify(data)
+
+				const response = updateVariantAPI(dataJSON).responseText
+				if(response == "Product Updated successfully") {
+					modal.toggle()
+					refreshList()
+					$('#info-name').html(`
+						<p class='text-info'>Product ${product} Updated successfully</p>
+					`)
+				} else{
+					$('#err-product').html(`
+						<p class='text-danger'>${response}</p>
+					`)
+				}
+			}
+		})
+
+		$('#btn-delete').click(function () {
+			const data = {
+				id: deleteId			
+            }
+
+			const dataJSON = JSON.stringify(data)
+
+			const response = deleteVariantAPI(dataJSON).responseText
+            if (response == "Product Deleted successfully") {
+                modal.toggle()
+				refreshList()
+				$('#info-name').html(`
+					<p class='text-info'>${response}</p>
+				`)
+            }else{
+                $('#err-name').html(`
+					<p class='text-danger'>${response}</p>
+				`)
+            }
+		})
+
+		$(".btn-cancel").click(function () {
+			modal.toggle()
+		})
+
+	</script>
+
+	<!--Kumpulan Script untuk Sorting Table-->
+	<script>
+        function sortTable(sortBy) {
+            if (sortBy == 'PRODUCT') {
+                hargaSortOrder = "ASC";
+                stokSortOrder = "ASC";
+                categorySortOrder = "ASC";
+                // other than #productsort
+                $('#hargasort').html('<i class="fas fa-sort"></i> Harga');
+                $('#stoksort').html('<i class="fas fa-sort"></i> Stok');
+                $('#categorySort').html('<i class="fas fa-sort"></i> Kategori');
+
+                productSortOrder = productSortOrder == "ASC" ? "DESC" : "ASC";
+                if (productSortOrder == "ASC") {
+                    $('#productsort').html('<i class="fas fa-sort-up"></i> Product');
+                } else {
+                    $('#productsort').html('<i class="fas fa-sort-down"></i> Product');
+                }
+
+                sortByGlobal = sortBy;
+                sortOrder = productSortOrder;
+            } else if (sortBy == 'HARGA') {
+                productSortOrder = "ASC";
+                stokSortOrder = "ASC";
+                categorySortOrder = "ASC";
+                // other than #hargasort
+                $('#productsort').html('<i class="fas fa-sort"></i> Product');
+                $('#stoksort').html('<i class="fas fa-sort"></i> Stok');
+                $('#categorySort').html('<i class="fas fa-sort"></i> Kategori');
+
+                hargaSortOrder = hargaSortOrder == "ASC" ? "DESC" : "ASC";
+                if (hargaSortOrder == "ASC") {
+                    $('#hargasort').html('<i class="fas fa-sort-up"></i> Harga');
+                } else {
+                    $('#hargasort').html('<i class="fas fa-sort-down"></i> Harga');
+                }
+
+                sortByGlobal = sortBy;
+                sortOrder = hargaSortOrder;
+            } else if (sortBy == 'STOK') {
+                productSortOrder = "ASC";
+                hargaSortOrder = "ASC";
+                categorySortOrder = "ASC";
+                // other than #stoksort
+                $('#productsort').html('<i class="fas fa-sort"></i> Product');
+                $('#hargasort').html('<i class="fas fa-sort"></i> Harga');
+                $('#categorySort').html('<i class="fas fa-sort"></i> Kategori');
+
+                stokSortOrder = stokSortOrder == "ASC" ? "DESC" : "ASC";
+                if (stokSortOrder == "ASC") {
+                    $('#stoksort').html('<i class="fas fa-sort-up"></i> Stok');
+                } else {
+                    $('#stoksort').html('<i class="fas fa-sort-down"></i> Stok');
+                }
+
+                sortByGlobal = sortBy;
+                sortOrder = stokSortOrder;
+            } else if (sortBy == 'CATEGORY') {
+                productSortOrder = "ASC";
+                hargaSortOrder = "ASC";
+                stokSortOrder = "ASC";
+                // other than #categorySort
+                $('#productsort').html('<i class="fas fa-sort"></i> Product');
+                $('#hargasort').html('<i class="fas fa-sort"></i> Harga');
+                $('#stoksort').html('<i class="fas fa-sort"></i> Stok');
+
+                categorySortOrder = categorySortOrder == "ASC" ? "DESC" : "ASC";
+                if (categorySortOrder == "ASC") {
+                    $('#categorySort').html('<i class="fas fa-sort-up"></i> Category');
+                } else {
+                    $('#categorySort').html('<i class="fas fa-sort-down"></i> Category');
+                }
+
+                sortByGlobal = sortBy;
+                sortOrder = categorySortOrder;
+            }
+            refreshList();
+        }
+
+	</script>
+
+	<!--Script untuk logic reset pagination UI-->
+	<script>
+		function resetPaginationUI(page, total_data, total_page) {
+			$('#pagination-container').html('');
+			$('#pagination-container').append(
+				`<li class="page-item ${page == 1 ? 'disabled' : ''}">
+					<a class="page-link " 
+						href="javascript:refreshList(${page - 1})">
+							Previous
+					</a>
+				</li>`
+			)
+
+			for (i = 0; i < total_page; i++) {
+				$('#pagination-container').append(`
+					<li class="page-item ${(i + 1) == page ? 'active' : ''}">
+						<a class="page-link"
+							href="javascript:refreshList(${i + 1})">
+							${i + 1}
+						</a>
+					</li>
+				`)
+			}
+
+			$('#pagination-container').append(
+				`<li class="page-item ${page == total_page ? 'disabled' : ''}">
+					<a class="page-link " 
+						href="javascript:refreshList(${page + 1})">
+							Next
+					</a>
+				</li>`
+			)
+		}
+	</script>
+
+	<!--Kumpulan Script untuk Fungsi Modal-->
+	<script>
+		function addItemModal() {
+			modal = new bootstrap.Modal($('#modalAddEdit'));
+			modal.toggle()
+			resetCategoryDropdownUi()
+			resetAddUi()
+		}
+
+		function editItemModal(index) {
+			modal = new bootstrap.Modal($('#modalAddEdit'));
+			modal.toggle()
+			resetCategoryDropdownUi();
+			resetEditUi(index)
+		}
+
+		function deleteItemModal(index) {
+			modal = new bootstrap.Modal($('#modalDelete'));
+			modal.toggle()
+			resetDeleteUi(index)
+		}
+
+		function resetCategoryDropdownUi() {
+			//Latihan 1: Menampilkan category List di dropdown
+			const response = getAllCategoriesAPI().responseJSON
+				let dataList = response
+				$('#dropdown-category').html('')
+				for (i = 0; i < dataList.length; i++) {
+					const data = dataList[i]
+					$('#dropdown-category').append(`
+						<option value="${data.id}">${data.category_name}</option>
+					`)
+				}
+		}
+
+		function resetAddUi() {
+            $('#err-product').html('')
+
+			$("#title-add-edit").html("Add Product")
+			$("#dropdown-category").val("")
+			$("#input-product").val("")
+			$("#input-harga").val("")
+            $("#input-deskripsi").val("")
+            $("#input-stok").val("")
+
+			$("#btn-save").val('Add')
+
+			$('#err-initial').html(``)
+			$('#err-name').html(``)
+
+			mode = 'add'
+		}
+
+		function resetEditUi(index) {
+            $('#err-product').html('')
+
+			const data = dataList[index]
+            console.log(data);
+			editId = data.id
+			$("#title-add-edit").html("Edit Product")
+			$("#dropdown-category").val(data.category_id)
+			$("#input-product").val(data.product_name)
+			$("#input-harga").val(data.harga)
+            $("#input-deskripsi").val(data.deskripsi)
+            $("#input-stok").val(data.stok_quantity)
+			$("#btn-save").val('Edit')
+
+			$('#err-initial').html(``)
+			$('#err-name').html(``)
+
+			mode = 'edit'
+		}
+
+		function resetDeleteUi(index) {
+			const data = dataList[index]
+			deleteId = data.id
+
+			$('#delete-title').html(`
+				Apakah anda yakin akan delete ${data.product_name}?
+			`)
+		}
+	</script>
+
+	<!--Script Logic Handle Search, Pagination & SortBy Frontend-->
+	<script>
+        function handleSearchPaginationSortingFE(list, page, keyword, sortBy, sortOrder) {
+            list = list.filter(data =>
+                data.product_name.toLowerCase().includes(keyword.toLowerCase()) ||
+                data.deskripsi.toLowerCase().includes(keyword.toLowerCase()) ||
+                data.kategori.toLowerCase().includes(keyword.toLowerCase()) ||
+                data.harga.toString().includes(keyword) ||
+                data.stok_quantity.toString().includes(keyword)
+            );
+
+            if (sortBy == "PRODUCT") {
+                list.sort((a, b) => a.product_name.localeCompare(b.product_name));
+            } else if (sortBy == 'NAME') {
+                list.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sortBy == 'CATEGORY') {
+                list.sort((a, b) => a.kategori.localeCompare(b.kategori));
+            } else if (sortBy == 'HARGA') {
+                list.sort((a, b) => a.harga - b.harga);
+            } else if (sortBy == 'STOK') {
+                list.sort((a, b) => a.stok_quantity - b.stok_quantity);
+            }
+
+            if (sortOrder == 'DESC') {
+                list.reverse();
+            }
+
+            let total_data = list.length;
+            let total_page = Math.ceil(total_data / limit.toFixed(2));
+
+            resetPaginationUI(page, total_data, total_page);
+
+            list = list.slice((page - 1) * limit, page * limit);
+
+            return list;
+        }
+
+	</script>
+
+	<!--Script Refresh List Ketika pertama kali halaman web dibuka-->
+	<script>
+		function refreshList(page) {
+			$('#info-name').html('')
+
+			if (page == null) {
+				page = 1
+			}
+
+			const keyword = $("#input-search").val()
+
+			const response = getAllVariantsAPI().responseJSON
+			dataListOri = response // original
+			dataList = handleSearchPaginationSortingFE(dataListOri, page, keyword, sortByGlobal, sortOrder); //ini utk UI
+			$('tbody').html('')
+			for (i = 0; i < dataList.length; i++) {
+				const data = dataList[i]
+				$('tbody').append(
+					`
+						<tr>
+							<th scope="row">${limit * (page - 1) + (i + 1)}</th>
+							<td>${data.product_name}</td>
+                            <td>Rp. ${data.harga}</td>
+                            <td>${data.deskripsi}</td>
+                            <td>${data.stok_quantity}</td>
+                            <td>${data.kategori}</td>
+							<td>
+								<a href="javascript:editItemModal(${i})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i>
+								Edit</a>
+								<a href="javascript:deleteItemModal(${i})" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i>
+								Delete</a>
+								</td>
+					    </tr>
+					`
+				)
+			}
+		}
+
+		refreshList()
+	</script>
+</body>
+</html>

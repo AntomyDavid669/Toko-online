@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Orders</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="/jqueryui/jquery-ui.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/sidebarcss.css">
+
+    <script src="/js/jquery-3.7.1.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/jqueryui/jquery-ui.min.js"></script>
+
+    <!-- Custom fonts for this template-->
+    <link href="/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <!-- <link href="/css/sb-admin-2.min.css" rel="stylesheet"> -->
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2"> <!-- row A -->
+                <!-- Sidebar -->
+                <header th:replace="~{/fragments/sidebar.html :: headerAdmin}"></header>
+            </div>
+            <div class="col-md-10"> <!-- row A -->
+                <main class="container py-5">
+                    <!-- Content Row -->
+                    <div class="row">
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Earnings (Monthly)</div>
+                                            <div id="earnings_monthly" class="h5 mb-0 font-weight-bold text-gray-800">Loading . . .</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Earnings (Annual)</div>
+                                            <div id="earnings_annual" class="h5 mb-0 font-weight-bold text-gray-800">Loading . . .</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Order (Monthly)
+                                            </div>
+                                            <div class="row no-gutters align-items-center">
+                                                <div class="col-auto">
+                                                    <div id="total_order_monthly" class="h5 mb-0 mr-3 font-weight-bold text-gray-800">Loading . . .</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Requests Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Total Order (Annual)</div>
+                                            <div id="total_order_annual" class="h5 mb-0 font-weight-bold text-gray-800">Loading . . .</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container py-5">
+                        <h1 class="mb-3">Orders</h1>
+                        <div id="info-name"></div>
+                
+                        <!-- Search and Add Buttons -->
+                        <div class="mb-3">
+                            <input id="input-search" type="search" class="form-control" placeholder="Search..." aria-label="Search">
+                        </div>
+                
+                        <!-- Table -->
+                        <table id="table" class="table table-bordered mb-3">
+                            <thead>
+                                <tr>
+                                    <th scope="col">No</th>
+                                    <th id="dateSort" class="col-md-3 text-center" onclick="sortTable('DATE')"><i class="fas fa-sort"></i> Date</th>
+                                    <th id="userSort" class="col-md-3 text-center" onclick="sortTable('USER')"><i class="fas fa-sort"></i> User</th>
+                                    <th id="totalamountSort" class="col-md-3 text-center" onclick="sortTable('TOTALAMOUNT')"><i class="fas fa-sort"></i> Total Amount</th>
+                                    <th id="categorySort" class="col-md-3 text-center">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!--  -->
+                            </tbody>
+                        </table>
+                
+                        <!-- Pagination -->
+                        <nav class="float-end" aria-label="Page navigation example">
+                            <ul id="pagination-container" class="pagination">
+                                <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </main>
+            </div><!-- End row A -->
+        </div>
+    </div>
+
+    <!--Script Kumpulan Variabel Global-->
+	<script th:inline="javascript">
+		//userId User yang login saat ini
+		//Data didapat dari controller
+		const userId = /*[[${user_id}]]*/ -1;
+		console.log('User ID yang login : ' + userId)
+
+		//Data List Original
+		let dataListOri = []
+		// DataList -> Untuk di UI (udah di proses dll)
+		let dataList = []
+
+		//Modal
+		let modal
+
+		//AddEditDelete
+		let mode
+		let editId
+		let deleteId
+
+		//Pagination
+		const limit = 10
+
+		//Sorting
+		let dateSortOrder = "ASC"
+		let userSortOrder = "ASC"
+		let totalammountSortOrder = "ASC"
+        let detailSortOrder = "ASC"
+
+		let sortByGlobal;
+		let sortOrder;	
+	</script>
+
+	<!--Kumpulan Script untuk AJAX-->
+	<script>
+		function getAllOrdersAPI() {
+			var settings = {
+                "url": "/api/order",
+				"method": "GET",
+				"timeout": 0,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+		function getEarningsMonthlyAPI() {
+			var settings = {
+                "url": "/api/order/earnings/monthly",
+				"method": "GET",
+				"timeout": 0,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+        function getEarningsAnnualAPI() {
+			var settings = {
+                "url": "/api/order/earnings/annual",
+				"method": "GET",
+				"timeout": 0,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+        function getTotalOrderMonthlyAPI() {
+			var settings = {
+                "url": "/api/order/totalorder/monthly",
+				"method": "GET",
+				"timeout": 0,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+        function getTotalOrderAnnualAPI() {
+			var settings = {
+                "url": "/api/order/totalorder/monthly",
+				"method": "GET",
+				"timeout": 0,
+				async: false
+			};
+
+			return $.ajax(settings)
+		}
+
+		
+	</script>
+
+	<!--Kumpulan Logic untuk button click-->
+	<script>
+		$('#input-search').on('input', function () {
+			refreshList();
+		});
+	</script>
+
+	<!--Kumpulan Script untuk Sorting Table-->
+	<script>
+		function sortTable(sortBy) {
+			if (sortBy == 'DATE') {
+				userSortOrder = "ASC"
+				totalammountSortOrder = "ASC"
+				$('#userSort').html('<i class="fas fa-sort"></i> User')
+				$('#totalamountSort').html('<i class="fas fa-sort"></i> Total Amount')
+                
+
+				dateSortOrder = dateSortOrder == "ASC" ? "DESC" : "ASC"
+				if (dateSortOrder == "ASC") {
+					$('#dateSort').html('<i class="fas fa-sort-up"></i> Date')
+				} else {
+					$('#dateSort').html('<i class="fas fa-sort-down"></i> Date')
+				}
+
+				sortByGlobal = sortBy
+				sortOrder = dateSortOrder
+			} else if (sortBy == 'USER') {
+				dateSortOrder = "ASC"
+				totalammountSortOrder = "ASC"
+				$('#dateSort').html('<i class="fas fa-sort"></i> Date')
+				$('#totalamountSort').html('<i class="fas fa-sort"></i> Total Amount')
+
+				userSortOrder = userSortOrder == "ASC" ? "DESC" : "ASC"
+				if (userSortOrder == "ASC") {
+					$('#userSort').html('<i class="fas fa-sort-up"></i> User')
+				} else {
+					$('#userSort').html('<i class="fas fa-sort-down"></i> User')
+				}
+
+				sortByGlobal = sortBy
+				sortOrder = userSortOrder
+			} else if (sortBy == 'TOTALAMOUNT') {
+				dateSortOrder = "ASC"
+				userSortOrder = "ASC"
+				$('#dateSort').html('<i class="fas fa-sort"></i> Date')
+				$('#userSort').html('<i class="fas fa-sort"></i> User')
+
+				totalammountSortOrder = totalammountSortOrder == "ASC" ? "DESC" : "ASC"
+				if (totalammountSortOrder == "ASC") {
+					$('#totalamountSort').html('<i class="fas fa-sort-up"></i> Total Amount')
+				} else {
+					$('#totalamountSort').html('<i class="fas fa-sort-down"></i> Total Amount')
+				}
+				
+				sortByGlobal = sortBy
+				sortOrder = totalammountSortOrder
+			}
+			refreshList()
+		}
+	</script>
+
+	<!--Script untuk logic reset pagination UI-->
+	<script>
+		function resetPaginationUI(page, total_data, total_page) {
+			$('#pagination-container').html('');
+			$('#pagination-container').append(
+				`<li class="page-item ${page == 1 ? 'disabled' : ''}">
+					<a class="page-link " 
+						href="javascript:refreshList(${page - 1})">
+							Previous
+					</a>
+				</li>`
+			)
+
+			for (i = 0; i < total_page; i++) {
+				$('#pagination-container').append(`
+					<li class="page-item ${(i + 1) == page ? 'active' : ''}">
+						<a class="page-link"
+							href="javascript:refreshList(${i + 1})">
+							${i + 1}
+						</a>
+					</li>
+				`)
+			}
+
+			$('#pagination-container').append(
+				`<li class="page-item ${page == total_page ? 'disabled' : ''}">
+					<a class="page-link " 
+						href="javascript:refreshList(${page + 1})">
+							Next
+					</a>
+				</li>`
+			)
+		}
+	</script>
+
+	<!--Script Logic Handle Search, Pagination & SortBy Frontend-->
+	<script>
+		function handleSearchPaginationSortingFE(list, page, keyword, sortBy, sortOrder) {
+			list = list.filter(data =>
+                data.order_date.toLowerCase().includes(keyword.toLowerCase()) ||
+                data.nama_lengkap.toLowerCase().includes(keyword.toLowerCase())
+            );
+
+			if (sortBy == 'DATE') {
+				list.sort((a, b) => a.order_date.localeCompare(b.order_date))
+			} else if (sortBy == 'USER') {
+				list.sort((a, b) => a.nama_lengkap.localeCompare(b.nama_lengkap))
+			} else if (sortBy == 'TOTALAMOUNT') {
+                list.sort((a, b) => a.total_Amount - b.total_Amount);
+            }
+
+			if(sortOrder == 'DESC'){
+				list.reverse()
+			}
+
+			let total_data = list.length;
+			let total_page = Math.ceil(total_data / limit.toFixed(2));
+
+			resetPaginationUI(page, total_data, total_page);
+
+			list = list.slice((page-1)*limit, (page*limit))
+
+			return list
+		}
+	</script>
+
+	<!--Script Refresh List Ketika pertama kali halaman web dibuka-->
+	<script>
+		function refreshList(page) {
+			$('#info-name').html('')
+
+			if (page == null) {
+				page = 1
+			}
+
+			const keyword = $("#input-search").val()
+
+			// const response = getAllOrdersAPI().responseJSON
+			// console.log(response);
+			// dataListOri = response // original
+			// dataList = handleSearchPaginationSortingFE(dataListOri, page, keyword, sortByGlobal, sortOrder); //ini utk UI
+			// $('tbody').html('')
+			// for (i = 0; i < dataList.length; i++) {
+			// 	const data = dataList[i]
+			// 	$('tbody').append(
+			// 		`
+			// 			<tr>
+			// 				<th scope="row">${limit * (page - 1) + (i + 1)}</th>
+            //                 <td>${data.order_date}</td>
+            //                 <td>${data.nama_lengkap}</td>
+            //                 <td>Rp. ${data.total_Amount}</td>
+            //                 <td class="col-md-6 m-0">${data.quantity} ${data.product_name}, ${data.subtotal} </td>
+			// 		    </tr>
+			// 		`
+			// 	)
+			// }
+
+			const response = getAllOrdersAPI().responseJSON;
+			console.log(response);
+			dataListOri = response; // original
+			dataList = handleSearchPaginationSortingFE(dataListOri, page, keyword, sortByGlobal, sortOrder); // ini untuk UI
+			$('tbody').html('');
+
+			// Buat objek untuk menyimpan data yang telah dikelompokkan berdasarkan order_id
+			const groupedData = {};
+			for (const data of dataList) {
+				if (!groupedData[data.order_id]) {
+					groupedData[data.order_id] = {
+						order_date: data.order_date,
+						nama_lengkap: data.nama_lengkap,
+						total_Amount: data.total_Amount,
+						products: []
+					};
+				}
+				groupedData[data.order_id].products.push({
+					product_name: data.product_name,
+					quantity: data.quantity,
+					subtotal: data.subtotal
+				});
+			}
+
+			// Tampilkan data yang telah dikelompokkan tanpa duplikasi
+			let index = 1;
+			for (const orderId of Object.keys(groupedData)) {
+				const order = groupedData[orderId];
+				$('tbody').append(
+					`
+					<tr>
+						<th scope="row">${index}</th>
+						<td>${order.order_date}</td>
+						<td>${order.nama_lengkap}</td>
+						<td>Rp. ${order.total_Amount}</td>
+						<td class="col-md-6 m-0">
+							${order.products.map(product => `${product.quantity} ${product.product_name}`).join('<br>')}
+						</td>
+					</tr>
+					`
+				);
+				index++;
+			}
+
+
+            const earnings_monthly = getEarningsMonthlyAPI().responseText
+            $('#earnings_monthly').html('Rp. ' + earnings_monthly)
+
+            const earnings_annual = getEarningsAnnualAPI().responseText
+            $('#earnings_annual').html('Rp. ' + earnings_annual)
+
+            const total_order_monthly = getTotalOrderMonthlyAPI().responseText
+            $('#total_order_monthly').html(total_order_monthly + ' Order')
+
+            const total_order_annual = getTotalOrderAnnualAPI().responseText
+            $('#total_order_annual').html(total_order_annual + ' Order')
+
+            
+			
+		}
+
+		refreshList()
+	</script>
+</body>
+</html>

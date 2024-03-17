@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>POS</title>
+
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="/jqueryui/jquery-ui.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/sidebarcss.css">
+
+    <script src="/js/jquery-3.7.1.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/jqueryui/jquery-ui.min.js"></script>
+
+	<style>
+		th.sortable {
+			cursor: pointer;
+		}
+	</style>
+</head>
+
+<body>
+
+	<main class="container py-5">
+		<div th:fragment="delete">
+			<h3 id="delete-title" class="mb-3 text-center">Are you sure you want to delete the variant?</h3>
+			<div class="row">
+				<div class="col d-grid">
+					<input id="btn-delete" type="submit" class="btn btn-danger mb-3" value="Delete">
+				</div>
+				<div class="col d-grid">
+					<input id="btn-cancel" type="button" class="btn btn-outline mb-3 btn-cancel" value="Cancel">
+				</div>
+			</div>
+		</div>
+	</main>
+</body>
+
+</html>
