@@ -18,7 +18,8 @@ public class ProductEntity extends BaseProperties{
     @Column private Double harga;
     @Column private Long category_id;
     @Column private Long stok_quantity;
-
+    @Column private String gambar_path;
+    
 
     public Long getProduct_id() {
         return this.product_id;
@@ -68,6 +69,12 @@ public class ProductEntity extends BaseProperties{
         this.stok_quantity = stok_quantity;
     }
 
+    public String getGambar_path() {
+        return this.gambar_path;
+    }
 
+    public void setGambar_path(String gambar_path) {
+        this.gambar_path = gambar_path;
+    }
 
 }

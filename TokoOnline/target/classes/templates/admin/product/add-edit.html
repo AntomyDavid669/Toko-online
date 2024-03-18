@@ -32,7 +32,7 @@
 
 	<main class="container py-5">
 		<div th:fragment="add-edit">
-			<form onsubmit="return false">
+			<form onsubmit="return false" enctype="multipart/form-data">
 				<h1 id="title-add-edit">Add </h1>
 				<div class="mb-3">
 					<label for="product" class="form-label">Product</label>
@@ -59,6 +59,13 @@
 					<select id="dropdown-category" class="form-select" placeholder="Click to see more!" required>
 					</select>
 					<div id="err-category"></div>
+				</div>
+				<!-- Upload Pict -->
+				<div class="mb-3">
+					<label for="gambar_path" class="form-label">Upload Gambar</label>
+					<br>
+					<input type="file" id="gambar_path" name="gambar_path" class="form-control-file">
+					<div id="err-gambar-path"></div>
 				</div>
 				<div class="row">
 					<div class="col d-grid">

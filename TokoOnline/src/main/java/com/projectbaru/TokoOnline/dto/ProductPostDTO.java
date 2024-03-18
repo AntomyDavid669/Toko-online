@@ -7,8 +7,16 @@ public class ProductPostDTO {
     private String deskripsi;
     private Long stok_quantity;
     private Long category_id;
+    private String gambar_path;
 
+    public String getGambar_path() {
+        return this.gambar_path;
+    }
 
+    public void setGambar_path(String gambar_path) {
+        this.gambar_path = gambar_path;
+    }
+    
     public Long getId() {
         return this.id;
     }

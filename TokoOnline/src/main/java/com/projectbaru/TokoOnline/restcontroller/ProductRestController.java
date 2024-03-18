@@ -1,15 +1,20 @@
 package com.projectbaru.TokoOnline.restcontroller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.projectbaru.TokoOnline.dto.ProductInterfaceDTO;
 import com.projectbaru.TokoOnline.dto.ProductPostDTO;
@@ -27,26 +32,26 @@ public class ProductRestController {
     }
 
     @PostMapping("/product")
-    public String insertProduct(@RequestBody ProductPostDTO productPostDTO){
+    public ResponseEntity<String> insertProduct(@RequestParam("image") MultipartFile image, ProductPostDTO productPostDTO) {
         try {
-            ps.insertProduct(productPostDTO);
-            String response = "Product Added successfully";
-            return response;
+            ps.insertProduct(productPostDTO, image);
+            return ResponseEntity.ok("Product Added successfully");
         } catch (CustomException e) {
-            String response = e.getMessage();
-            return response;
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
     @PutMapping("/product")
-    public String updateProduct(@RequestBody ProductPostDTO productPostDTO){
+    public ResponseEntity<String> updateProduct(@RequestParam("image") MultipartFile image, ProductPostDTO productPostDTO) {
         try {
-            ps.updateProduct(productPostDTO);
-            String response = "Product Updated successfully";
-            return response;
+            ps.updateProduct(productPostDTO, image);
+            return ResponseEntity.ok("Product Updated successfully");
         } catch (CustomException e) {
-            String response = e.getMessage();
-            return response;
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 

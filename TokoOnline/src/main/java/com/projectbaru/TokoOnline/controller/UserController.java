@@ -51,10 +51,10 @@ public class UserController {
         return "user";
     }
 
-    @GetMapping("admin-page")
-    public String adminPage (Model model, Principal principal){
-        UserDetails userDetails = userDetailsService.loadUserByUsername(principal.getName());
-        model.addAttribute("user", userDetails);
-        return "admin";
-    }
+    // @GetMapping("admin")
+    // public String adminPage (Model model, Principal principal){
+    //     UserDetails userDetails = userDetailsService.loadUserByUsername(principal.getName());
+    //     model.addAttribute("user", userDetails);
+    //     return "/admin/orders";
+    // }
 }

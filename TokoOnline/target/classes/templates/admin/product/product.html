@@ -151,34 +151,48 @@
 			return $.ajax(settings)
 		}
 
-		function insertVariantAPI(respBody) {
-			var settings = {
-				"url": "/api/product",
-				"method": "POST",
-				"timeout": 0,
-				"headers": {
-					"Content-Type": "application/json"
+		function insertProductAPI(formData) {
+			$.ajax({
+				url: "/api/product",
+				type: "POST",
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function (response) {
+					modal.toggle();
+					refreshList();
+					$('#info-name').html(`
+						<p class='text-info'>Product ${response.product_name} Added successfully</p>
+					`);
 				},
-				"data": respBody,
-				async: false
-			};
-
-			return $.ajax(settings)
+				error: function (xhr, status, error) {
+					$('#err-product').html(`
+						<p class='text-danger'>${error}</p>
+					`);
+				}
+			});
 		}
 
-		function updateVariantAPI(respBody) {
-			var settings = {
-				"url": "/api/product",
-				"method": "PUT",
-				"timeout": 0,
-				"headers": {
-					"Content-Type": "application/json"
+		function updateProductAPI(formData) {
+			$.ajax({
+				url: "/api/product",
+				type: "PUT",
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function (response) {
+					modal.toggle();
+					refreshList();
+					$('#info-name').html(`
+						<p class='text-info'>Product ${response.product_name} Updated successfully</p>
+					`);
 				},
-				"data": respBody,
-				async: false
-			};
-
-			return $.ajax(settings)
+				error: function (xhr, status, error) {
+					$('#err-product').html(`
+						<p class='text-danger'>${error}</p>
+					`);
+				}
+			});
 		}
 
 		function deleteVariantAPI(resBody) {
@@ -203,85 +217,50 @@
 			refreshList();
 		});
 
+		function UploadPict () {
+			event.preventDefault()
+			const file = $('#gambar_path')[0].files[0]
+			if (file) {
+				let response = uploadPhotoAPI(userProfileId, file).responseText
+				let responseJSON = JSON.parse(response)
+				$('#err-gambar-path').html(response)
+			}
+
+		}
+
 		$("#btn-save").click(function () {
-			$('#err-product').html('')
-            $('#err-harga').html('')
-            $('#err-deskripsi').html('')
-            $('#err-stok').html('')
+			$('#err-product').html('');
+			$('#err-harga').html('');
+			$('#err-deskripsi').html('');
+			$('#err-stok').html('');
 
-			//Penjagaan agar program tidak dilanjutkan
-			//jika initial atau namenya kosong
-			const product = $("#input-product").val()
-			if (product == null || product == "") {
-				return
-			}
-			const harga = $("#input-harga").val()
-			if (harga == null || harga == "") {
-				return
-			}
-            const deskripsi = $("#input-deskripsi").val()
-			if (deskripsi == null || deskripsi == "") {
-				return
-			}
-			const stok = $("#input-stok").val()
-			if (stok == null || stok == "") {
-				return
+			const product = $("#input-product").val();
+			const harga = $("#input-harga").val();
+			const deskripsi = $("#input-deskripsi").val();
+			const stok = $("#input-stok").val();
+			const categoryId = $("#dropdown-category").val();
+			const fileInput = $('#gambar_path')[0];
+			const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+			if (!product || !harga || !deskripsi || !stok || !categoryId || !file) {
+				return;
 			}
 
-			const categoryId = $("#dropdown-category").val()
-			if(categoryId == null || categoryId == ""){
-				return
-			}
-	
+			const formData = new FormData();
+			formData.append('image', file);
+			formData.append('category_id', categoryId);
+			formData.append('product_name', product);
+			formData.append('harga', harga);
+			formData.append('deskripsi', deskripsi);
+			formData.append('stok_quantity', stok);
+
 			if (mode == 'add') {
-				const data = {
-					category_id: categoryId,
-					product_name: product,
-					harga: harga,
-					deskripsi: deskripsi,
-                    stok_quantity:stok
-				}
-
-				dataJSON = JSON.stringify(data)
-
-				const response = insertVariantAPI(dataJSON).responseText
-				if(response == "Product Added successfully") {
-					modal.toggle()
-					refreshList()
-					$('#info-name').html(`
-						<p class='text-info'>Product ${product} Added successfully</p>
-					`)
-				} else{
-					$('#err-product').html(`
-						<p class='text-danger'>${response}</p>
-					`)
-				}
+				insertProductAPI(formData);
 			} else if (mode == 'edit') {
-				const data = {
-					id: editId,
-					product_name: product,
-					harga: harga,
-					deskripsi: deskripsi,
-                    stok_quantity:stok,
-                    category_id: categoryId
-				}
-
-				dataJSON = JSON.stringify(data)
-
-				const response = updateVariantAPI(dataJSON).responseText
-				if(response == "Product Updated successfully") {
-					modal.toggle()
-					refreshList()
-					$('#info-name').html(`
-						<p class='text-info'>Product ${product} Updated successfully</p>
-					`)
-				} else{
-					$('#err-product').html(`
-						<p class='text-danger'>${response}</p>
-					`)
-				}
+				formData.append('id', editId);
+				updateProductAPI(formData);
 			}
-		})
+		});
 
 		$('#btn-delete').click(function () {
 			const data = {
